@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Cormorant+Garamond:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  /* Kalamkari Palette */
+  --kk-deep-red: #8B1A1A;
+  --kk-madder: #A0522D;
+  --kk-rust: #B7472A;
+  --kk-indigo: #2C3E6B;
+  --kk-mustard: #C8933E;
+  --kk-gold: #DAA520;
+  --kk-green: #3B5323;
+  --kk-cream: #FDF5E6;
+  --kk-ivory: #FAF0E6;
+  --kk-brown: #5C3317;
+  --kk-warm-white: #FFFBF0;
+  --kk-text: #2D1810;
+  --kk-text-light: #6B4F3F;
+  --kk-border: #E8D5C0;
+
+  font-family: 'Poppins', system-ui, sans-serif;
+  line-height: 1.6;
+  font-weight: 400;
+  color: var(--kk-text);
+  background-color: var(--kk-warm-white);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Playfair Display', Georgia, serif;
+  line-height: 1.2;
+}
+
+a {
+  color: var(--kk-deep-red);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--kk-rust);
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
