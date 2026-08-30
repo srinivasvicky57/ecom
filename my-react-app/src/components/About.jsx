@@ -23,7 +23,7 @@ function AboutContent() {
       {aboutText.description.map((text, i) => (
         <p key={i} dangerouslySetInnerHTML={{ __html: text }} />
       ))}
-      <div className="about-features">
+      {/* <div className="about-features">
         {aboutText.features.map((feat, i) => (
           <div className="feature" key={i}>
             <div className="feature-icon-wrapper">
@@ -35,7 +35,7 @@ function AboutContent() {
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 }

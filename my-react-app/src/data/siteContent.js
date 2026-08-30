@@ -15,8 +15,17 @@ export const aboutText = {
   badge: 'Our Heritage',
   title: 'The Ancient Art of Kalamkari',
   description: [
-    'Kalamkari, meaning "pen work" in Persian, is a centuries-old art form originating from Andhra Pradesh, India. Using natural dyes derived from plants, minerals, and indigo, skilled artisans create mesmerizing patterns that depict mythological narratives, floral motifs, and intricate geometric designs.',
-    'At <strong>Kalamkari Kala</strong>, we work directly with master artisans from Srikalahasti and Machilipatnam to bring you authentic, handcrafted pieces that preserve this magnificent tradition while supporting the livelihoods of artisan communities.',
+    `<strong>From a Humble Beginning to 16,000 Heartbeats:</strong> The MS Vastravarna Story Every great journey begins with a small step and a big dream. Two years ago, MS Vastravarna was born in a quiet corner of our home, built on a deep passion for authentic handlooms and a vision to bring timeless artistry into everyday fashion. We started with just 264 belief-filled customers who took a chance on our dream.
+Step by step, line by line, we grew. Moving from a home-based setup to a local street presence gave us our greatest asset: direct conversations with you. Understanding your needs, hearing your stories, and seeing your love for our fabrics pushed us to take our biggest leap yet—opening our very own dedicated retail space.
+Innovating Kalamkari for the Modern Professional
+`,
+`<strong>We noticed a gap in the fast-paced corporate world:</strong> women wanted the elegance of traditional Indian heritage without compromising on daily style and structure. To bring a chic, contemporary edge to IT hubs and modern workplaces, we introduced premium, innovative edits of Kalamkari—transforming age-old craft into sharp, breathable, modern essentials.
+A Leap of Faith: The Feeding Frock Success
+Innovation often comes with uncertainty. When we first conceptualized Kalamkari feeding frocks, we hesitated. Could functional maternity wear be made beautiful, comfortable, and deeply rooted in artisan handloom? Overcoming our fears paid off in ways we never imagined—today, our feeding frocks stand as one of our all-time top bestsellers, trusted by young mothers every day.
+16,000+ Strong and Growing Every Day
+What started as a handful of orders has blossomed into a thriving family of over 16,000 customers. Your glowing reviews, honest feedback, and continuous support have driven us to innovate constantly—introducing fresh silhouettes, better fits, and elevated designs.
+Today, MS Vastravarna isn't just a label; it’s a living story of tradition meeting modern utility. Every day, we show up with one goal: to get better for you.`,
+`<strong>Thank you for being the heart of our journey!</strong>`
   ],
   features: [
     {
