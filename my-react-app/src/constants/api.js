@@ -1,4 +1,15 @@
-const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+const getDefaultApiBase = () => {
+  if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '');
+
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:5000';
+  }
+
+  return window.location.origin;
+};
+
+export const API_BASE_URL = getDefaultApiBase();
+const apiBase = API_BASE_URL;
 const url = (path) => `${apiBase}${path}`;
 
 export const API_URL = url('/api/auth');
@@ -11,6 +22,7 @@ export const WISHLIST_URL = url('/api/wishlist');
 export const CART_URL = url('/api/cart');
 export const ADDRESS_URL = url('/api/address');
 export const ORDER_URL = url('/api/orders');
+export const SETTINGS_URL = url('/api/settings');
 export const PRODUCT_CODE_IMAGE_URL = url('/api/product-code-images');
 
 // Banner — session-level cache

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { authFetch } from '../../constants/auth'
 import { API_URL, ORDER_URL } from '../../constants/api'
+import GenerateInvoiceButton from '../GenerateInvoiceButton'
 import SettingsTab from '../SettingsTab'
 import AdminBirthdayWishes from './AdminBirthdayWishes'
 
@@ -466,7 +467,10 @@ function AdminOrderTab({ activeTab, ordersByStatus, onStatusChange, addToast }) 
               {/* Order footer */}
               <div className="admin-order-card-footer">
                 <span className="admin-order-card-payment">{order.payment?.method || ''}{order.payment?.paymentStatus ? ` · ${order.payment.paymentStatus}` : ''}</span>
-                <span className="admin-order-card-total">Total: ₹{(order.totalAmount || 0).toLocaleString('en-IN')}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <GenerateInvoiceButton order={order} />
+                  <span className="admin-order-card-total">Total: ₹{(order.totalAmount || 0).toLocaleString('en-IN')}</span>
+                </div>
               </div>
             </div>
           ))}

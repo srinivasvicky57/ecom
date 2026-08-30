@@ -87,6 +87,25 @@ const AdminProducts = () => {
   // Form updaters
   const update = (key, val) => setForm(prev => ({ ...prev, [key]: val }))
 
+  const calculateDiscount = (originalPrice, sellingPrice) => {
+    const original = Number(originalPrice || 0)
+    const selling = Number(sellingPrice || 0)
+
+    if (!original || !selling || original <= 0 || selling <= 0) return 0
+    if (selling >= original) return 0
+
+    const discountPercent = ((original - selling) / original) * 100
+    return Math.round(Math.max(0, Math.min(100, discountPercent)))
+  }
+
+  const updatePriceFields = (field, value) => {
+    setForm(prev => {
+      const next = { ...prev, [field]: value }
+      next.discount = calculateDiscount(next.originalPrice, next.price)
+      return next
+    })
+  }
+
   // Sizes
   const updateSize = (i, key, val) => setForm(prev => {
     const sizes = [...prev.sizes]; sizes[i] = { ...sizes[i], [key]: val }; return { ...prev, sizes }
@@ -149,6 +168,10 @@ const AdminProducts = () => {
     if (!form.subcategory.trim()) { addToast('Subcategory is required', 'error'); return }
     if (!form.price || Number(form.price) <= 0) { addToast('Valid price is required', 'error'); return }
     if (!form.originalPrice || Number(form.originalPrice) <= 0) { addToast('Valid original price is required', 'error'); return }
+
+    const computedDiscount = calculateDiscount(form.originalPrice, form.price)
+    setForm(prev => ({ ...prev, discount: computedDiscount }))
+
     const resolvedImage = productCodeToImage[form.productCode.trim()] || form.image.trim()
     if (!resolvedImage) { addToast('Mapped image not found for selected product code', 'error'); return }
     if (!form.material.trim()) { addToast('Material is required', 'error'); return }
@@ -166,7 +189,7 @@ const AdminProducts = () => {
         description: form.description.trim(),
         price: Number(form.price),
         originalPrice: Number(form.originalPrice) || 0,
-        discount: Number(form.discount) || 0,
+        discount: computedDiscount,
         image: resolvedImage,
         badge: form.badge.trim(),
         material: form.material.trim(),
@@ -296,17 +319,16 @@ const AdminProducts = () => {
             <div className="admin-prod-field">
               <label className="admin-prod-label">Price (₹) <span style={{color:'#c0392b'}}>*</span></label>
               <input className="admin-prod-input" type="number" min="0" placeholder="4999"
-                value={form.price} onChange={e => update('price', e.target.value)} />
+                value={form.price} onChange={e => updatePriceFields('price', e.target.value)} />
             </div>
             <div className="admin-prod-field">
               <label className="admin-prod-label">Original Price (₹) <span style={{color:'#c0392b'}}>*</span></label>
               <input className="admin-prod-input" type="number" min="0" placeholder="7999"
-                value={form.originalPrice} onChange={e => update('originalPrice', e.target.value)} />
+                value={form.originalPrice} onChange={e => updatePriceFields('originalPrice', e.target.value)} />
             </div>
             <div className="admin-prod-field">
               <label className="admin-prod-label">Discount (%)</label>
-              <input className="admin-prod-input" type="number" min="0" max="100" placeholder="38"
-                value={form.discount} onChange={e => update('discount', e.target.value)} />
+              <input className="admin-prod-input" type="text" readOnly value={form.discount} style={{ background: 'var(--kk-ivory)', cursor: 'default' }} />
             </div>
           </div>
 

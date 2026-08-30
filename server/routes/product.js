@@ -33,11 +33,26 @@ router.get('/:id', async (req, res) => {
 });
 
 // POST /api/products - Create product (admin only)
+const calculateDiscount = (originalPrice, sellingPrice) => {
+  const original = Number(originalPrice || 0);
+  const selling = Number(sellingPrice || 0);
+
+  if (!original || !selling || original <= 0 || selling <= 0) return 0;
+  if (selling >= original) return 0;
+
+  return Math.round(Math.max(0, Math.min(100, ((original - selling) / original) * 100)));
+};
+
 router.post('/', authMiddleware, async (req, res) => {
   try {
     if (!req.user.isAdmin) return res.status(403).json({ error: 'Admin access required' });
 
-    const product = await Product.create(req.body);
+    const payload = {
+      ...req.body,
+      discount: calculateDiscount(req.body.originalPrice, req.body.price),
+    };
+
+    const product = await Product.create(payload);
     res.status(201).json(product);
   } catch (err) {
     if (err.code === 11000) {
@@ -56,7 +71,12 @@ router.put('/:id', authMiddleware, async (req, res) => {
   try {
     if (!req.user.isAdmin) return res.status(403).json({ error: 'Admin access required' });
 
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    const payload = {
+      ...req.body,
+      discount: calculateDiscount(req.body.originalPrice, req.body.price),
+    };
+
+    const product = await Product.findByIdAndUpdate(req.params.id, payload, {
       new: true,
       runValidators: true,
     });

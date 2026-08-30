@@ -39,6 +39,7 @@ const wishlistRoutes = require('./routes/wishlist');
 const cartRoutes = require('./routes/cart');
 const addressRoutes = require('./routes/address');
 const orderRoutes = require('./routes/order');
+const settingsRoutes = require('./routes/settings');
 app.use('/api/auth', authRoutes);
 app.use('/api/banner', bannerRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -50,6 +51,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/address', addressRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/settings', settingsRoutes);
 
 // Health check
 app.get('/', (req, res) => {

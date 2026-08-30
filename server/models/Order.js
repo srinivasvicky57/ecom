@@ -119,6 +119,20 @@ const orderSchema = new mongoose.Schema({
     required: true,
     min: 0
   },
+  invoice: {
+    fileName: {
+      type: String,
+      default: null
+    },
+    url: {
+      type: String,
+      default: null
+    },
+    generatedAt: {
+      type: Date,
+      default: null
+    }
+  },
   orderStatus: {
     type: String,
     enum: ['Placed', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled', 'Returned'],

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { isAuthenticated, fetchProfile } from "../../constants/auth";
+import { isAuthenticated, fetchProfile, authFetch } from "../../constants/auth";
+import { SETTINGS_URL } from "../../constants/api";
 import {
   ShoppingBagIcon,
   BarChartIcon,
@@ -36,10 +37,48 @@ const AdminView = () => {
     products: false,
     customerInfo: false,
   });
+  const [maintenanceEnabled, setMaintenanceEnabled] = useState(false);
   const { addToast } = useToast();
 
   const toggle = (key) =>
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const handleMaintenanceToggle = async () => {
+    const nextValue = !maintenanceEnabled;
+
+    try {
+      const res = await authFetch(`${SETTINGS_URL}/maintenance`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ maintenanceMode: nextValue }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Failed to update maintenance mode');
+      }
+
+      setMaintenanceEnabled(nextValue);
+      addToast(nextValue ? 'Maintenance mode enabled' : 'Maintenance mode cancelled', 'success');
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+  };
+
+  useEffect(() => {
+    const loadMaintenanceState = async () => {
+      try {
+        const res = await fetch(`${SETTINGS_URL}/maintenance`);
+        if (!res.ok) throw new Error('Failed to fetch maintenance state');
+        const data = await res.json();
+        setMaintenanceEnabled(Boolean(data.maintenanceMode));
+      } catch {
+        setMaintenanceEnabled(false);
+      }
+    };
+
+    loadMaintenanceState();
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -98,6 +137,22 @@ const AdminView = () => {
 
       <div className="admin-view-content">
         <div className="admin-content-inner">
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
+            <button
+              type="button"
+              className="settings-action-btn"
+              style={{
+                background: maintenanceEnabled ? '#fbe9e9' : '#f2efe8',
+                color: maintenanceEnabled ? '#8b1f1f' : '#2d4a2d',
+                borderColor: maintenanceEnabled ? '#d7a0a0' : '#c5d1b5',
+                fontWeight: 700,
+              }}
+              onClick={handleMaintenanceToggle}
+            >
+              {maintenanceEnabled ? 'Cancel Maintenance Mode' : 'Enable Maintenance Mode'}
+            </button>
+          </div>
+
           {/* Admin Tabs */}
           <div className="admin-tabs">
             {ADMIN_TABS.map((tab) => (

@@ -19,8 +19,9 @@ import InfoPage from './components/InfoPage'
 import Checkout from './components/Checkout'
 import Loader from './components/Loader'
 import Dummy from './components/dummy'
-import { isAuthenticated, setAuth, clearAuth, authFetch } from './constants/auth'
-import { WISHLIST_URL, CART_URL } from './constants/api'
+import MaintenancePage from './components/MaintenancePage'
+import { isAuthenticated, setAuth, clearAuth, authFetch, fetchProfile } from './constants/auth'
+import { WISHLIST_URL, CART_URL, SETTINGS_URL } from './constants/api'
 
 function App() {
 
@@ -37,7 +38,10 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return isAuthenticated()
   })
+  const [maintenanceMode, setMaintenanceMode] = useState(false)
+  const [maintenanceLoading, setMaintenanceLoading] = useState(true)
   const [user, setUser] = useState(null)
+  const [userLoading, setUserLoading] = useState(true)
   const [loginOpen, setLoginOpen] = useState(false)
   const wishlistCount = wishlist.length
 
@@ -53,7 +57,52 @@ function App() {
     } catch { setWishlist([]) }
   }
 
+  useEffect(() => {
+    const loadUserProfile = async () => {
+      if (!isAuthenticated()) {
+        setUser(null)
+        setUserLoading(false)
+        return
+      }
+
+      try {
+        const res = await fetchProfile()
+        if (!res.ok) {
+          clearAuth()
+          setUser(null)
+          setIsLoggedIn(false)
+          return
+        }
+        const data = await res.json()
+        setUser(data.user || null)
+      } catch {
+        setUser(null)
+      } finally {
+        setUserLoading(false)
+      }
+    }
+
+    loadUserProfile()
+  }, [isLoggedIn])
+
   useEffect(() => { fetchWishlist() }, [isLoggedIn])
+
+  useEffect(() => {
+    const loadMaintenanceState = async () => {
+      try {
+        const res = await fetch(`${SETTINGS_URL}/maintenance`)
+        if (!res.ok) throw new Error('Failed to fetch maintenance state')
+        const data = await res.json()
+        setMaintenanceMode(Boolean(data.maintenanceMode))
+      } catch {
+        setMaintenanceMode(false)
+      } finally {
+        setMaintenanceLoading(false)
+      }
+    }
+
+    loadMaintenanceState()
+  }, [])
 
   /* Fetch cart count from API when logged in */
   const fetchCartCount = async () => {
@@ -159,6 +208,12 @@ function App() {
       observer.disconnect()
     }
   }, [location.pathname])
+
+  const isAdminUser = !!user?.isAdmin
+
+  if (maintenanceMode && !maintenanceLoading && !userLoading && !isAdminUser) {
+    return <MaintenancePage />
+  }
 
   return (
     <>
