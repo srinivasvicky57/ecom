@@ -4386,14 +4386,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   padding: 12px 18px;
   border-top: 1px solid var(--kk-border);
   background: rgba(92, 51, 23, 0.02);
+  flex-wrap: nowrap;
+}
+
+.order-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-left: auto;
+  flex-shrink: 0;
 }
 
 .order-card-total-label {
   font-size: 0.82rem;
   color: var(--kk-text-light);
+  flex-shrink: 0;
 }
 
 .order-card-total {
@@ -4401,6 +4413,7 @@
   font-weight: 700;
   color: var(--kk-deep-red);
   font-size: 1.05rem;
+  white-space: nowrap;
 }
 
 .order-row {

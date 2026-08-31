@@ -55,6 +55,11 @@ const orderSchema = new mongoose.Schema({
       required: true,
       min: 0
     },
+    mrp: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     qty: {
       type: Number,
       required: true,

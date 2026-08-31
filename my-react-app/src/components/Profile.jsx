@@ -6,6 +6,7 @@ import { useToast } from './Toast'
 import AdminProfile from './admin/AdminProfile'
 import SettingsTab from './SettingsTab'
 import Loader from './Loader'
+import GenerateInvoiceButton from './GenerateInvoiceButton'
 
 const EMPTY_ADDRESS = { name: '', mobile: '', pincode: '', state: '', address: '', landmark: '', district: '', isDefault: false }
 
@@ -396,7 +397,10 @@ const Profile = () => {
                                 </div>
                                 <div className="order-card-footer">
                                   <span className="order-card-total-label">{order.items.length} item{order.items.length > 1 ? 's' : ''}</span>
-                                  <span className="order-card-total">₹{order.totalAmount?.toLocaleString()}</span>
+                                  <div className="order-card-actions">
+                                    <GenerateInvoiceButton order={order} />
+                                    <span className="order-card-total">₹{order.totalAmount?.toLocaleString()}</span>
+                                  </div>
                                 </div>
                               </div>
                             ))}
@@ -451,7 +455,10 @@ const Profile = () => {
                             </div>
                             <div className="order-card-footer">
                               <span className="order-card-total-label">{order.items.length} item{order.items.length > 1 ? 's' : ''}</span>
-                              <span className="order-card-total">₹{order.totalAmount?.toLocaleString()}</span>
+                              <div className="order-card-actions">
+                                <GenerateInvoiceButton order={order} />
+                                <span className="order-card-total">₹{order.totalAmount?.toLocaleString()}</span>
+                              </div>
                             </div>
                           </div>
                         ))}

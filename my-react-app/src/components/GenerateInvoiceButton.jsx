@@ -1,13 +1,24 @@
-import { API_BASE_URL } from '../constants/api'
+import { ORDER_URL } from '../constants/api'
+import { authFetch } from '../constants/auth'
 
 const GenerateInvoiceButton = ({ order }) => {
-  const invoiceUrl = order?.invoice?.url
+  if (!order?.orderId) return null
 
-  if (!invoiceUrl) return null
+  const handleOpenInvoice = async () => {
+    try {
+      const res = await authFetch(`${ORDER_URL}/${order.orderId}/invoice`)
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        throw new Error(err.message || 'Failed to generate invoice')
+      }
 
-  const handleOpenInvoice = () => {
-    const fullUrl = new URL(invoiceUrl, API_BASE_URL).toString()
-    window.open(fullUrl, '_blank', 'noopener,noreferrer')
+      const blob = await res.blob()
+      const pdfUrl = URL.createObjectURL(blob)
+      window.open(pdfUrl, '_blank', 'noopener,noreferrer')
+    } catch (error) {
+      console.error('Invoice open error:', error)
+      window.alert(error.message || 'Unable to open invoice')
+    }
   }
 
   return (
