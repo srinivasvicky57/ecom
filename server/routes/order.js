@@ -214,8 +214,101 @@ const generateInvoicePdf = (order) => {
     drawCell(totalGstX, totalRowY + 2, colWidths[7], totalRowH, formatPdfCurrency(itemGstTotal), { fontSize: 8 })
     drawCell(totalAmountX, totalRowY + 2, colWidths[8], totalRowH, formatPdfCurrency(itemTotal + itemGstTotal), { bold: true, fontSize: 8, align: 'right' })
 
-    // Tax summary block - premium GST style layout
-  
+    // Tax summary block - professional GST table
+    const taxSummaryY = totalRowY + totalRowH + 18
+    const taxTableHeight = 86
+    const taxColWidths = [96, 118, 94, 94, 118]
+    const taxHeaders = ['HSN/ SAC', 'Taxable Amount(₹)', 'CGST', 'SGST', 'Total Tax(₹)']
+    const taxableSummary = roundMoney(itemBaseTotal)
+    const cgstSummary = roundMoney(taxableSummary * 0.025)
+    const sgstSummary = roundMoney(taxableSummary * 0.025)
+    const totalTaxSummary = roundMoney(cgstSummary + sgstSummary)
+
+    doc.rect(left, taxSummaryY, right - left, taxTableHeight).stroke(borderColor)
+    doc.fillColor('#f8f5f0').rect(left + 1, taxSummaryY + 1, right - left - 2, 20).fill()
+    doc.fillColor('#000000').font(pdfBoldFont).fontSize(9).text('Tax Summary', left + 10, taxSummaryY + 6)
+
+    let taxX = left
+    taxHeaders.forEach((header, idx) => {
+      const width = taxColWidths[idx]
+      doc.fillColor('#000000').font(pdfBoldFont).fontSize(7.5)
+        .text(header, taxX + 4, taxSummaryY + 28, { width, align: 'center' })
+      taxX += width
+    })
+
+    const taxDividerX = [
+      left + taxColWidths[0],
+      left + taxColWidths[0] + taxColWidths[1],
+      left + taxColWidths[0] + taxColWidths[1] + taxColWidths[2],
+      left + taxColWidths[0] + taxColWidths[1] + taxColWidths[2] + taxColWidths[3]
+    ]
+
+    taxDividerX.forEach((xPos) => {
+      doc.moveTo(xPos, taxSummaryY).lineTo(xPos, taxSummaryY + taxTableHeight).stroke(borderColor)
+    })
+
+    doc.moveTo(left, taxSummaryY + 44).lineTo(right, taxSummaryY + 44).stroke(borderColor)
+
+    const rowY = taxSummaryY + 48
+    const rowValues = [
+      '',
+      formatPdfCurrency(taxableSummary),
+      formatPdfCurrency(cgstSummary),
+      formatPdfCurrency(sgstSummary),
+      formatPdfCurrency(totalTaxSummary)
+    ]
+
+    let valueX = left
+    rowValues.forEach((value, idx) => {
+      const width = taxColWidths[idx]
+      if (idx === 2 || idx === 3) {
+        doc.fillColor('#000000').font(pdfRegularFont).fontSize(7)
+          .text('2.50%', valueX + 4, rowY + 2, { width, align: 'center' })
+        doc.fillColor('#000000').font(pdfBoldFont).fontSize(7)
+          .text(String(value || ''), valueX + 4, rowY + 12, { width, align: 'center' })
+      } else {
+        doc.fillColor('#000000').font(pdfBoldFont).fontSize(7.5)
+          .text(String(value || ''), valueX + 4, rowY + 10, { width, align: 'center' })
+      }
+      valueX += width
+    })
+
+    // Footer block matching the provided invoice layout without overlap
+    const termsY = taxSummaryY + taxTableHeight + 18
+    const footerH = 190
+    const leftTermsW = 280
+    const rightTermsX = left + leftTermsW
+    const rightTermsW = right - left - leftTermsW
+    const footerHeaderH = 28
+    const bodyY = termsY + footerHeaderH
+    const bodyH = footerH - footerHeaderH
+
+    doc.rect(left, termsY, right - left, footerH).stroke(borderColor)
+    doc.moveTo(rightTermsX, termsY).lineTo(rightTermsX, termsY + footerH).stroke(borderColor)
+
+    // Left panel
+    doc.fillColor('#dfe5eb').rect(left, termsY, leftTermsW, footerHeaderH).fill()
+    doc.fillColor('#000000').font(pdfBoldFont).fontSize(11).text('Terms And Conditions:', left + 10, termsY + 8)
+
+    doc.fillColor('#f4f4f4').rect(left, bodyY, leftTermsW, bodyH).fill()
+    doc.fillColor('#000000').font(pdfRegularFont).fontSize(10).text('Thank you for doing business with us.', left + 12, bodyY + 14)
+
+    // Right panel
+    doc.fillColor('#dfe5eb').rect(rightTermsX, termsY, rightTermsW, footerHeaderH).fill()
+
+    doc.fillColor('#f4f4f4').rect(rightTermsX, bodyY, rightTermsW, bodyH).fill()
+    doc.fillColor('#000000').font(pdfBoldFont).fontSize(11).text('For MS Vastravarna Kalamkari And Handlooms:', rightTermsX + 12, bodyY + 12, {
+      width: rightTermsW - 24,
+      align: 'center'
+    })
+
+    const sigBoxX = rightTermsX + 58
+    const sigBoxY = bodyY + 58
+    const sigBoxW = 150
+    const sigBoxH = 68
+    doc.rect(sigBoxX, sigBoxY, sigBoxW, sigBoxH).stroke(borderColor)
+    doc.fillColor('#000000').font(pdfRegularFont).fontSize(11).text('Authorized Signatory', rightTermsX + 82, bodyY + 142)
+
     doc.end()
   })
 }
