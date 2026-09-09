@@ -1,9 +1,12 @@
 const getDefaultApiBase = () => {
-  if (import.meta.env.VITE_API_BASE_URL) return import.meta.env.VITE_API_BASE_URL.replace(/\/+$/, '');
+  const configuredBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_BACKEND_URL;
+  if (configuredBase) return configuredBase.replace(/\/+$/, '');
 
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://localhost:5000';
   }
+
+  console.warn('No VITE_API_BASE_URL or VITE_BACKEND_URL configured for production. Falling back to same-origin API base.');
 
   return window.location.origin;
 };

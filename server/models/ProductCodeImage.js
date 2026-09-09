@@ -8,10 +8,13 @@ const productCodeImageSchema = new mongoose.Schema({
     trim: true,
     uppercase: true,
   },
-  image: {
+  imageData: {
     type: String,
     required: true,
-    trim: true,
+  },
+  mimeType: {
+    type: String,
+    default: 'image/jpeg',
   },
   width: {
     type: Number,

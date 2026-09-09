@@ -1,7 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const fs = require('fs')
-const path = require('path')
 const multer = require('multer')
 const ProductCodeImage = require('../models/ProductCodeImage')
 const { authMiddleware } = require('../middleware/auth')
@@ -14,23 +12,20 @@ const requireAdmin = (req, res) => {
   return true
 }
 
-const uploadDir = path.join(__dirname, '..', 'uploads', 'product-code-images')
-fs.mkdirSync(uploadDir, { recursive: true })
+// Transform document to include data URI
+const transformDocument = (doc) => {
+  if (!doc) return doc
+  const obj = doc.toObject ? doc.toObject() : doc
+  const dataUri = `data:${obj.mimeType};base64,${obj.imageData}`
+  return {
+    ...obj,
+    image: dataUri, // Add image field as data URI for compatibility
+  }
+}
 
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const safeCode = String(req.body.productCode || 'ITEM')
-      .trim()
-      .toUpperCase()
-      .replace(/[^A-Z0-9-]/g, '')
-    const ext = path.extname(file.originalname || '').toLowerCase() || '.jpg'
-    cb(null, `${safeCode}-${Date.now()}${ext}`)
-  },
-})
-
+// Use memory storage to read files into buffer instead of disk
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (!file.mimetype || !file.mimetype.startsWith('image/')) {
@@ -40,25 +35,11 @@ const upload = multer({
   },
 })
 
-const filePathToPublicPath = (absolutePath) => {
-  const fileName = path.basename(absolutePath)
-  return `/uploads/product-code-images/${fileName}`
-}
-
-const tryDeleteFile = (publicPath) => {
-  if (!publicPath || !publicPath.startsWith('/uploads/')) return
-  const relativePath = publicPath.replace(/^\/uploads\//, '')
-  const absolutePath = path.join(__dirname, '..', 'uploads', relativePath)
-  if (fs.existsSync(absolutePath)) {
-    fs.unlinkSync(absolutePath)
-  }
-}
-
 // GET /api/product-code-images - Fetch all code-image mappings (public)
 router.get('/', async (req, res) => {
   try {
     const mappings = await ProductCodeImage.find().sort({ productCode: 1 })
-    res.json(mappings)
+    res.json(mappings.map(transformDocument))
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch product code images' })
   }
@@ -71,21 +52,24 @@ router.post('/', authMiddleware, upload.single('image'), async (req, res) => {
 
     const { productCode } = req.body
     if (!productCode || !String(productCode).trim()) {
-      if (req.file?.path) fs.unlinkSync(req.file.path)
       return res.status(400).json({ error: 'Product code is required' })
     }
     if (!req.file) {
       return res.status(400).json({ error: 'Image file is required' })
     }
 
+    const imageData = req.file.buffer.toString('base64')
+    const mimeType = req.file.mimetype
+
     const created = await ProductCodeImage.create({
       productCode: String(productCode).trim().toUpperCase(),
-      image: filePathToPublicPath(req.file.path),
+      imageData,
+      mimeType,
       width: 0,
       height: 0,
     })
 
-    res.status(201).json(created)
+    res.status(201).json(transformDocument(created))
   } catch (err) {
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Product code already exists' })
@@ -105,22 +89,22 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
 
     const { productCode } = req.body
     if (!productCode || !String(productCode).trim()) {
-      if (req.file?.path) fs.unlinkSync(req.file.path)
       return res.status(400).json({ error: 'Product code is required' })
     }
 
     const existing = await ProductCodeImage.findById(req.params.id)
     if (!existing) {
-      if (req.file?.path) fs.unlinkSync(req.file.path)
       return res.status(404).json({ error: 'Product code image not found' })
     }
 
-    let imagePath = existing.image
+    let imageData = existing.imageData
+    let mimeType = existing.mimeType
     let width = existing.width
     let height = existing.height
 
     if (req.file) {
-      imagePath = filePathToPublicPath(req.file.path)
+      imageData = req.file.buffer.toString('base64')
+      mimeType = req.file.mimetype
       width = 0
       height = 0
     }
@@ -129,22 +113,16 @@ router.put('/:id', authMiddleware, upload.single('image'), async (req, res) => {
       req.params.id,
       {
         productCode: String(productCode).trim().toUpperCase(),
-        image: imagePath,
+        imageData,
+        mimeType,
         width,
         height,
       },
       { new: true, runValidators: true }
     )
 
-    if (req.file && existing.image !== updated.image) {
-      tryDeleteFile(existing.image)
-    }
-
-    res.json(updated)
+    res.json(transformDocument(updated))
   } catch (err) {
-    if (req.file?.path && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path)
-    }
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Product code already exists' })
     }
@@ -163,8 +141,6 @@ router.delete('/:id', authMiddleware, async (req, res) => {
 
     const deleted = await ProductCodeImage.findByIdAndDelete(req.params.id)
     if (!deleted) return res.status(404).json({ error: 'Product code image not found' })
-
-    tryDeleteFile(deleted.image)
 
     res.json({ message: 'Product code image deleted' })
   } catch (err) {
