@@ -154,7 +154,7 @@ export const loginText = {
   errors: {
     allFields: 'Please fill in all fields.',
     passwordMismatch: 'Passwords do not match.',
-    passwordMinLength: 'Password must be at least 8 characters with 1 special character.',
+    passwordMinLength: 'Password must be at least 4 characters.',
   },
   forgotPassword: {
     title: 'Forgot Password',

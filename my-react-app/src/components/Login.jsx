@@ -29,8 +29,7 @@ const validators = {
   },
   password: (val) => {
     if (!val) return 'Password is required';
-    if (val.length < 8) return 'Password must be at least 8 characters';
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val)) return 'Password must contain at least 1 special character';
+    if (val.length < 4) return 'Password must be at least 4 characters';
     return '';
   },
   confirmPassword: (val, password) => {

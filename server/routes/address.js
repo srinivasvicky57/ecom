@@ -21,7 +21,7 @@ router.get('/', async (req, res) => {
 router.post('/', async (req, res) => {
   try {
     const { name, mobile, pincode, state, address, landmark, district, isDefault } = req.body
-    if (!name || !mobile || !pincode || !state || !address || !landmark || !district) {
+    if (!name || !mobile || !pincode || !state || !address || !district) {
       return res.status(400).json({ error: 'All fields are required' })
     }
 

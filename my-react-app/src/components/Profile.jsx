@@ -16,7 +16,6 @@ const addressValidators = {
   pincode: (v) => { if (!v.trim()) return 'Pincode is required'; if (!/^\d{6}$/.test(v)) return 'Must be 6 digits'; return '' },
   state: (v) => (!v.trim() ? 'State is required' : ''),
   address: (v) => (!v.trim() ? 'Address is required' : ''),
-  landmark: (v) => (!v.trim() ? 'Landmark is required' : ''),
   district: (v) => (!v.trim() ? 'District is required' : ''),
 }
 
@@ -74,9 +73,9 @@ function AddressFormModal({ editAddr, userId, onSaved, onClose, addToast }) {
         </div>
         <form className="address-modal-form" onSubmit={handleSubmit}>
           <div className="address-form-grid">
-            {[{ key: 'name', label: 'Full Name', type: 'text' }, { key: 'mobile', label: 'Mobile Number', type: 'tel' }, { key: 'pincode', label: 'Pincode', type: 'text' }, { key: 'state', label: 'State', type: 'text' }, { key: 'district', label: 'District', type: 'text' }, { key: 'landmark', label: 'Landmark', type: 'text' }].map(f => (
+            {[{ key: 'name', label: 'Full Name', type: 'text', required: true }, { key: 'mobile', label: 'Mobile Number', type: 'tel', required: true }, { key: 'pincode', label: 'Pincode', type: 'text', required: true }, { key: 'state', label: 'State', type: 'text', required: true }, { key: 'district', label: 'District', type: 'text', required: true }, { key: 'landmark', label: 'Landmark', type: 'text', required: false }].map(f => (
               <div key={f.key} className="address-form-field">
-                <label className="profile-form-label">{f.label} <span className="login-required">*</span></label>
+                <label className="profile-form-label">{f.label} {f.required && <span className="login-required">*</span>}</label>
                 <input className={`profile-form-input${errors[f.key] ? ' profile-form-error' : ''}`} type={f.type} value={form[f.key]} onChange={e => handleChange(f.key, e.target.value)} />
                 {errors[f.key] && <span className="profile-field-error">{errors[f.key]}</span>}
               </div>

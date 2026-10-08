@@ -261,6 +261,34 @@ router.put('/profile', authMiddleware, async (req, res) => {
   }
 });
 
+// POST /api/auth/change-password — Change password for the current user
+router.post('/change-password', authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current and new passwords are required' });
+    }
+
+    const user = await User.findOne({ userId: req.user.userId });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' });
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      const messages = Object.values(err.errors).map(e => e.message);
+      return res.status(400).json({ message: messages.join(', ') });
+    }
+    console.error('Change password error:', err);
+    res.status(500).json({ message: 'Failed to update password' });
+  }
+});
+
 // POST /api/auth/addresses — Add new address
 router.post('/addresses', authMiddleware, async (req, res) => {
   try {

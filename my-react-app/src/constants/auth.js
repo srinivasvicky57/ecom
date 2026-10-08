@@ -80,6 +80,13 @@ export const updateProfile = async (body) => {
   }
   return res
 }
+
+export const changePassword = (body) => authFetch(`${API_URL}/change-password`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body),
+})
+
 export const addAddress = (body) => {
   _profileCache = null
   return authFetch(`${API_URL}/addresses`, {

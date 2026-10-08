@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'Password is required'],
-    minlength: [8, 'Password must be at least 8 characters']
+    minlength: [4, 'Password must be at least 4 characters']
   },
   isAdmin: {
     type: Boolean,
@@ -70,7 +70,7 @@ const userSchema = new mongoose.Schema({
     pincode: { type: String, required: [true, 'Pincode is required'] },
     state: { type: String, required: [true, 'State is required'] },
     address: { type: String, required: [true, 'Address is required'] },
-    landmark: { type: String, required: [true, 'Landmark is required'] },
+    landmark: { type: String, default: '' },
     district: { type: String, required: [true, 'District is required'] },
     isDefault: { type: Boolean, default: false }
   }],

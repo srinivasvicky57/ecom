@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react'
-import { updateProfile } from '../constants/auth'
+import { changePassword, updateProfile } from '../constants/auth'
 
 const profileValidators = {
   name: (val) => {
@@ -19,6 +19,12 @@ const profileFilters = {
   phone: (val) => val.replace(/\D/g, '').slice(0, 10),
 };
 
+const validatePassword = (value) => {
+  if (!value) return 'Password is required';
+  if (value.length < 4) return 'Password must be at least 4 characters';
+  return '';
+};
+
 function SettingsTab({ user, setUserDetails, addToast }) {
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({ name: user.name,
@@ -26,6 +32,10 @@ function SettingsTab({ user, setUserDetails, addToast }) {
      dateOfBirth: user.dateOfBirth ? user.dateOfBirth.slice(0, 10) : '',
       gender: user.gender || '' })
   const [errors, setErrors] = useState({})
+  const [showPasswordForm, setShowPasswordForm] = useState(false)
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', verifyPassword: '' })
+  const [passwordErrors, setPasswordErrors] = useState({})
+  const [passwordLoading, setPasswordLoading] = useState(false)
   const nameRef = useRef(null)
 
   const handleChange = (field, rawValue) => {
@@ -45,6 +55,38 @@ function SettingsTab({ user, setUserDetails, addToast }) {
   const handleCancel = () => {
     setEditing(false)
     setErrors({})
+  }
+
+  const handlePasswordChange = (field, value) => {
+    setPasswordForm(prev => ({ ...prev, [field]: value }))
+    setPasswordErrors(prev => ({ ...prev, [field]: '' }))
+  }
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault()
+    const newErrors = {}
+    if (!passwordForm.currentPassword) newErrors.currentPassword = 'Current password is required'
+    else if (passwordForm.currentPassword.length < 4) newErrors.currentPassword = 'Password must be at least 4 characters'
+    const newPasswordError = validatePassword(passwordForm.newPassword)
+    if (newPasswordError) newErrors.newPassword = newPasswordError
+    if (!passwordForm.verifyPassword) newErrors.verifyPassword = 'Please verify your password'
+    else if (passwordForm.newPassword !== passwordForm.verifyPassword) newErrors.verifyPassword = 'Passwords do not match'
+    if (Object.keys(newErrors).length) { setPasswordErrors(newErrors); return }
+
+    setPasswordLoading(true)
+    try {
+      const res = await changePassword({ currentPassword: passwordForm.currentPassword, newPassword: passwordForm.newPassword })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to update password')
+      addToast(data.message, 'success')
+      setPasswordForm({ currentPassword: '', newPassword: '', verifyPassword: '' })
+      setPasswordErrors({})
+      setShowPasswordForm(false)
+    } catch (err) {
+      addToast(err.message, 'error')
+    } finally {
+      setPasswordLoading(false)
+    }
   }
 
   const handleSave = (e) => {
@@ -153,8 +195,40 @@ function SettingsTab({ user, setUserDetails, addToast }) {
 
         <div className="settings-group">
           <h4 className="settings-group-title">Account Actions</h4>
-          <button className="settings-action-btn">Change Password</button>
-          <button className="settings-action-btn settings-action-danger">Delete Account</button>
+          <button
+            type="button"
+            className="settings-action-btn"
+            onClick={() => { setShowPasswordForm(prev => !prev); setPasswordErrors({}) }}
+          >
+            Change Password
+          </button>
+          {showPasswordForm && (
+            <form className="change-password-form" onSubmit={handlePasswordSubmit}>
+              {[
+                ['currentPassword', 'Enter existing password'],
+                ['newPassword', 'Enter new password'],
+                ['verifyPassword', 'Verify new password'],
+              ].map(([field, label]) => (
+                <div className="profile-form-row" key={field}>
+                  <label className="profile-form-label">{label}</label>
+                  <input
+                    className={`profile-form-input${passwordErrors[field] ? ' profile-form-error' : ''}`}
+                    type="password"
+                    value={passwordForm[field]}
+                    onChange={(e) => handlePasswordChange(field, e.target.value)}
+                  />
+                  {passwordErrors[field] && <span className="profile-field-error">{passwordErrors[field]}</span>}
+                </div>
+              ))}
+              <div className="profile-form-actions">
+                <button type="submit" className="settings-action-btn profile-save-btn" disabled={passwordLoading}>
+                  {passwordLoading ? 'Updating...' : 'Update Password'}
+                </button>
+                <button type="button" className="settings-action-btn" onClick={() => setShowPasswordForm(false)}>Cancel</button>
+              </div>
+            </form>
+          )}
+          {/* <button className="settings-action-btn settings-action-danger">Delete Account</button> */}
         </div>
       </div>
     </div>

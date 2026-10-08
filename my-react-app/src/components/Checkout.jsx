@@ -11,7 +11,6 @@ const addressValidators = {
   pincode: (v) => { if (!v.trim()) return 'Pincode is required'; if (!/^\d{6}$/.test(v)) return 'Must be 6 digits'; return ''; },
   state: (v) => (!v.trim() ? 'State is required' : ''),
   address: (v) => (!v.trim() ? 'Address is required' : ''),
-  landmark: (v) => (!v.trim() ? 'Landmark is required' : ''),
   district: (v) => (!v.trim() ? 'District is required' : ''),
 };
 
@@ -628,11 +627,11 @@ function Checkout() {
                     { key: 'pincode', label: 'Pincode', type: 'text', placeholder: '6-digit pincode' },
                     { key: 'state', label: 'State', type: 'text', placeholder: 'State' },
                     { key: 'district', label: 'District', type: 'text', placeholder: 'District' },
-                    { key: 'landmark', label: 'Landmark', type: 'text', placeholder: 'Landmark' },
+                    { key: 'landmark', label: 'Landmark', type: 'text', placeholder: 'Landmark', required: false },
                   ].map(f => (
                     <div key={f.key} className="ck-addr-field">
 
-                      <label>{f.label} <span className="ck-addr-required">*</span></label>
+                      <label>{f.label} {f.required !== false && <span className="ck-addr-required">*</span>}</label>
                       <input
                         type={f.type}
                         value={addressForm[f.key]}

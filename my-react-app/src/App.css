@@ -5528,6 +5528,17 @@
   gap: 16px;
 }
 
+.change-password-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 520px;
+  padding: 16px;
+  border: 1px solid var(--kk-border);
+  border-radius: 12px;
+  background: var(--kk-warm-white);
+}
+
 .profile-update-form button[type="submit"],
 .profile-update-form button[type="button"].profile-save-btn {
   grid-column: 1 / -1;
