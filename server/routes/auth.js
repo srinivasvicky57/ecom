@@ -1,17 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const nodemailer = require('nodemailer');
+const { sendEmail } = require('../services/email');
 const User = require('../models/User');
 const { generateToken, authMiddleware } = require('../middleware/auth');
-
-// Email transporter (configured once)
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.SMTP_EMAIL,
-    pass: process.env.SMTP_APP_PASSWORD
-  }
-});
 
 // POST /api/auth/signup — Register new user
 router.post('/signup', async (req, res) => {
@@ -105,12 +96,9 @@ router.post('/forgot-password', async (req, res) => {
     user.resetOtpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await user.save();
 
-    console.log(`[Forgot Password] OTP for ${email}: ${otp}`);
-
     // Send OTP email
-    await transporter.sendMail({
-      from: `"MS Vastravarna" <${process.env.SMTP_EMAIL}>`,
-      to: email,
+    await sendEmail({
+      to: user.email,
       subject: 'MS Vastravarna - Password Reset OTP',
       html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:30px 24px;background:#faf7f2;border-radius:12px">
         <div style="text-align:center;margin-bottom:20px">
@@ -130,7 +118,10 @@ router.post('/forgot-password', async (req, res) => {
 
     res.json({ message: 'OTP sent to your email' });
   } catch (err) {
-    console.error('Forgot password error:', err);
+    console.error('Forgot password error:', err.message);
+    if (err.code === 'EMAIL_CONFIGURATION' || err.code === 'EMAIL_DELIVERY') {
+      return res.status(503).json({ message: 'Unable to send OTP email. Please try again later.' });
+    }
     res.status(500).json({ message: 'Server error' });
   }
 });
